@@ -1,0 +1,9 @@
+html<h2>Edit Booking</h2>
+<form method="POST" action="/update/<%= booking._id %>">
+  Name: <input name="name" value="<%= booking.name %>"><br>
+  Phone: <input name="phone" value="<%= booking.phone %>"><br>
+  Date: <input name="date" type="date" value="<%= booking.date %>"><br>
+  Time: <input name="time" type="time" value="<%= booking.time %>"><br>
+  Pax: <input name="pax" type="number" value="<%= booking.pax %>"><br>
+  <button>Update</button>
+</form>
