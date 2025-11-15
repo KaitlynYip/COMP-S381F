@@ -40,9 +40,13 @@ app.get('/', requireLogin, async (req, res) => {
   await client.connect();
   const bookings = await client.db(dbName).collection('bookings')
     .find()
-    .sort({ date: 1, time: 1 })  // ← oldest first
+    .sort({ date: 1, time: 1 })
     .toArray();
-  res.render('list', { bookings, user: req.session.user });
+  res.render('list', { 
+    bookings, 
+    user: req.session.user,
+    search: {}  // ← ADD THIS LINE
+  });
 });
 
 // === CREATE ===
@@ -92,6 +96,31 @@ app.get('/delete/:id', requireLogin, async (req, res) => {
   await client.db(dbName).collection('bookings').deleteOne({ _id: new ObjectId(req.params.id) });
   res.redirect('/');
 });
+
+// === SEARCH BOOKINGS ===
+app.get('/search', requireLogin, async (req, res) => {
+  await client.connect();
+  const query = {};
+
+  // Build dynamic query from URL params
+  if (req.query.name) query.name = new RegExp(req.query.name, 'i'); // case-insensitive
+  if (req.query.phone) query.phone = new RegExp(req.query.phone, 'i');
+  if (req.query.date) query.date = req.query.date;
+  if (req.query.pax) query.pax = parseInt(req.query.pax);
+
+  const bookings = await client.db(dbName).collection('bookings')
+    .find(query)
+    .sort({ date: 1, time: 1 })
+    .toArray();
+
+  res.render('list', { 
+    bookings, 
+    user: req.session.user,
+    search: req.query  // keep search values in form
+  });
+});
+
+
 
 // === RESTful API (No Auth) ===
 app.get('/api/bookings', async (req, res) => {
